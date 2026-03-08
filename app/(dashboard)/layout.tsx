@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/features/auth/actions";
 import Link from "next/link";
+import HeaderNav from "@/features/dashboard/components/HeaderNav";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -16,13 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </svg>
             LandLedger
           </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-text-muted hidden sm:block">{user?.email}</span>
-            <Link href="/profile" className="text-sm text-text-muted hover:text-primary transition-colors">პროფილი</Link>
-            <form action={signOut}>
-              <button type="submit" className="text-sm text-text-muted hover:text-danger transition-colors">გამოსვლა</button>
-            </form>
-          </div>
+          <HeaderNav email={user?.email} />
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>

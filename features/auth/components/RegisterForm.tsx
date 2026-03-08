@@ -3,6 +3,7 @@
 import { signUp } from "@/features/auth/actions";
 import Link from "next/link";
 import { useActionState } from "react";
+import SocialButtons from "@/features/auth/components/SocialButtons";
 
 export default function RegisterForm() {
   const [state, action, pending] = useActionState(
@@ -41,9 +42,9 @@ export default function RegisterForm() {
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-text mb-1">პაროლი</label>
           <input
-            id="password" name="password" type="password" required autoComplete="new-password" minLength={6}
+            id="password" name="password" type="password" required autoComplete="new-password"
             className="w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-border-focus"
-            placeholder="მინ. 6 სიმბოლო"
+            placeholder="მინ. 8 სიმბოლო, A-z, სიმბოლო"
           />
         </div>
         <button
@@ -53,6 +54,8 @@ export default function RegisterForm() {
           {pending ? "მიმდინარეობს..." : "რეგისტრაცია"}
         </button>
       </form>
+
+      <SocialButtons />
 
       <p className="text-center text-sm text-text-muted mt-6">
         უკვე გაქვს ანგარიში?{" "}

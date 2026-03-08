@@ -3,6 +3,7 @@
 import { signIn } from "@/features/auth/actions";
 import Link from "next/link";
 import { useActionState } from "react";
+import SocialButtons from "@/features/auth/components/SocialButtons";
 
 export default function LoginForm() {
   const [state, action, pending] = useActionState(
@@ -53,6 +54,8 @@ export default function LoginForm() {
           {pending ? "მიმდინარეობს..." : "შესვლა"}
         </button>
       </form>
+
+      <SocialButtons />
 
       <p className="text-center text-sm text-text-muted mt-6">
         ანგარიში არ გაქვს?{" "}
