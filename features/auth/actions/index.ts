@@ -40,12 +40,14 @@ export async function signOut() {
   redirect("/login");
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(next?: string) {
   const supabase = await createClient();
+  const callbackUrl = new URL(`${SITE_URL}/auth/callback`);
+  if (next) callbackUrl.searchParams.set("next", next);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${SITE_URL}/auth/callback` },
+    options: { redirectTo: callbackUrl.toString() },
   });
 
   if (error) {
@@ -55,13 +57,15 @@ export async function signInWithGoogle() {
   if (data.url) redirect(data.url);
 }
 
-export async function signInWithFacebook() {
+export async function signInWithFacebook(next?: string) {
   const supabase = await createClient();
+  const callbackUrl = new URL(`${SITE_URL}/auth/callback`);
+  if (next) callbackUrl.searchParams.set("next", next);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "facebook",
     options: {
-      redirectTo: `${SITE_URL}/auth/callback`,
+      redirectTo: callbackUrl.toString(),
       scopes: "email,public_profile",
     },
   });

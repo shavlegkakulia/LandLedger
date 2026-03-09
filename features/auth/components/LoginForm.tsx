@@ -9,7 +9,7 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Input } from "@/components/ui/Input";
 import { SubmitButton } from "@/components/ui/Button";
 
-export default function LoginForm({ oauthError }: { oauthError?: string }) {
+export default function LoginForm({ oauthError, next }: { oauthError?: string; next?: string }) {
   const t = useTranslations("auth");
   const locale = useLocale();
 
@@ -46,7 +46,7 @@ export default function LoginForm({ oauthError }: { oauthError?: string }) {
         <SubmitButton loadingText={t("loading")}>{t("loginButton")}</SubmitButton>
       </form>
 
-      <SocialButtons />
+      <SocialButtons next={next} />
 
       <p className="text-center text-sm text-text-muted mt-6">
         {t("noAccount")}{" "}

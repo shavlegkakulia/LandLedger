@@ -60,10 +60,13 @@ export async function proxy(request: NextRequest) {
     pathWithoutLocale.startsWith("/acceptable-use") ||
     pathWithoutLocale.startsWith("/disclaimer");
 
-  // logged out — login-ზე
+  // logged out — login-ზე, next param-ით რომ login-ის შემდეგ დავბრუნდეთ
   if (!user && !isAuthPage && !isPublic) {
     const url = request.nextUrl.clone();
+    const nextUrl = request.nextUrl.pathname + (request.nextUrl.search || "");
     url.pathname = `${localePrefix}/login`;
+    url.search = "";
+    url.searchParams.set("next", nextUrl);
     return NextResponse.redirect(url);
   }
 

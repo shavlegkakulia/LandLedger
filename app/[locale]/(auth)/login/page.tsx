@@ -6,10 +6,10 @@ export const metadata: Metadata = {
 };
 
 interface Props {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { error } = await searchParams;
-  return <LoginForm oauthError={error} />;
+  const { error, next } = await searchParams;
+  return <LoginForm oauthError={error} next={next} />;
 }

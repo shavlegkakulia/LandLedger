@@ -4,7 +4,7 @@ import { signInWithFacebook, signInWithGoogle } from "@/features/auth/actions";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-export default function SocialButtons() {
+export default function SocialButtons({ next }: { next?: string }) {
   const t = useTranslations("auth");
   const [loadingFb, setLoadingFb] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
@@ -12,13 +12,13 @@ export default function SocialButtons() {
 
   async function handleFacebook() {
     setLoadingFb(true); setError(null);
-    const res = await signInWithFacebook();
+    const res = await signInWithFacebook(next);
     if (res?.error) { setError(res.error); setLoadingFb(false); }
   }
 
   async function handleGoogle() {
     setLoadingGoogle(true); setError(null);
-    const res = await signInWithGoogle();
+    const res = await signInWithGoogle(next);
     if (res?.error) { setError(res.error); setLoadingGoogle(false); }
   }
 

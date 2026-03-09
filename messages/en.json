@@ -13,7 +13,7 @@
     "titleHighlight": "Message the Owner",
     "titleSuffix": "Directly",
     "subtitle": "Search for a parcel by cadastral code, city, or region. Leave a message for the owner — they may be open to a good offer.",
-    "searchPlaceholder": "Cadastral code, city or region...",
+    "searchPlaceholder": "Cadastral code...",
     "searchButton": "Search",
     "ctaMain": "Find a Parcel",
     "ctaSecondary": "See How It Works",
@@ -267,7 +267,8 @@
     "emailLabel": "Email (public) *",
     "emailPlaceholder": "you@example.com",
     "contactRequired": "Phone or email — at least one is required so others can contact you.",
-    "public": "Public"
+    "public": "Public",
+    "saveButton": "Save"
   },
   "deleteAccount": {
     "button": "Delete Account",
