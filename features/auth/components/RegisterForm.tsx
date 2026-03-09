@@ -36,6 +36,15 @@ export default function RegisterForm() {
           placeholder="მინ. 8 სიმბოლო, A-z, სიმბოლო"
           hint="მინ. 8 სიმბოლო, დიდი და პატარა ასო, სპეციალური სიმბოლო"
         />
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input type="checkbox" name="terms" required className="mt-0.5 accent-primary shrink-0" />
+          <span className="text-xs text-text-muted leading-relaxed">
+            ვეთანხმები{" "}
+            <Link href="/terms" target="_blank" className="text-primary hover:underline">გამოყენების პირობებს</Link>
+            {" "}და{" "}
+            <Link href="/privacy" target="_blank" className="text-primary hover:underline">კონფიდენციალურობის პოლიტიკას</Link>
+          </span>
+        </label>
         <SubmitButton loadingText="მიმდინარეობს...">რეგისტრაცია</SubmitButton>
       </form>
 

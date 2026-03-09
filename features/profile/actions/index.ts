@@ -33,6 +33,15 @@ export async function sendContactMessage({
   if (!user) return { error: "არ ხარ ავტორიზებული" };
   if (user.id === ownerId) return { error: "საკუთარ თავს ვერ დაუკავშირდები" };
 
+  // Rate limit: 24 საათში max 3 შეტყობინება ერთ მფლობელზე
+  const { data: withinLimit } = await supabase.rpc("check_contact_rate_limit", {
+    p_sender_id: user.id,
+    p_owner_id: ownerId,
+  });
+  if (!withinLimit) {
+    return { error: "24 საათში მაქსიმუმ 3 შეტყობინების გაგზავნა შეიძლება ერთ მფლობელზე" };
+  }
+
   const { data: owner } = await supabase
     .from("profiles")
     .select("first_name, last_name, email, show_email")
@@ -143,4 +152,28 @@ export async function upsertProfile(formData: FormData) {
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
+}
+
+export async function deleteAccount() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "არ ხარ ავტორიზებული" };
+
+  // contact_logs, parcel_views, parcels — cascade-ით იშლება
+  // profiles — cascade-ით იშლება
+  // auth.users-ს წაშლა service_role-ს სჭირდება; server action-ი admin client-ს იყენებს
+  const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+  const admin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) {
+    await logError("account.delete", error.message, { userId: user.id });
+    return { error: "ანგარიშის წაშლა ვერ მოხერხდა" };
+  }
+
+  await supabase.auth.signOut();
+  redirect("/");
 }

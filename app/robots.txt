@@ -2,6 +2,11 @@ User-agent: *
 Allow: /
 Allow: /contact
 Allow: /parcels/
+Allow: /terms
+Allow: /privacy
+Allow: /cookies
+Allow: /acceptable-use
+Allow: /disclaimer
 
 Disallow: /dashboard
 Disallow: /onboarding

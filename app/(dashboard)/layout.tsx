@@ -25,14 +25,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
       ?? "";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <header className="bg-surface border-b border-border sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold text-primary">
+          <Link href="/" className="flex items-center gap-2 text-primary">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-9.894A11.958 11.958 0 0112 3c3.866 0 7.32 1.834 9.547 4.703L16 12H8l1 8z" />
             </svg>
-            LandLedger
+            <span className="text-lg font-bold tracking-tight">LandLedger</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/contact" className="text-sm text-text-faint hover:text-text-muted transition-colors hidden sm:block">კონტაქტი</Link>
@@ -40,7 +40,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">{children}</main>
+      <footer className="border-t border-border py-5 mt-8">
+        <div className="max-w-6xl mx-auto px-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-text-faint">
+          <Link href="/terms" className="hover:text-primary transition-colors">გამოყენების პირობები</Link>
+          <span>·</span>
+          <Link href="/privacy" className="hover:text-primary transition-colors">კონფიდენციალურობა</Link>
+          <span>·</span>
+          <Link href="/cookies" className="hover:text-primary transition-colors">Cookie პოლიტიკა</Link>
+          <span>·</span>
+          <Link href="/disclaimer" className="hover:text-primary transition-colors">Disclaimer</Link>
+          <span>·</span>
+          <Link href="/contact" className="hover:text-primary transition-colors">კონტაქტი</Link>
+        </div>
+      </footer>
     </div>
   );
 }

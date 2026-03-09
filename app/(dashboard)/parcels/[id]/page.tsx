@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import OwnerCard from "@/features/parcels/components/OwnerCard";
+import ParcelActions from "@/features/parcels/components/ParcelActions";
 import type { Metadata } from "next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://landledger.ge";
@@ -113,6 +114,10 @@ export default async function ParcelDetailPage({ params }: { params: Promise<{ i
         </div>
 
         {owner && <OwnerCard owner={owner} isOwner={isOwner} />}
+
+        {!isOwner && user && (
+          <ParcelActions parcelId={parcel.id} />
+        )}
       </div>
     </>
   );

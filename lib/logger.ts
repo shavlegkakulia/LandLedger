@@ -8,9 +8,11 @@ type LogAction =
   | "auth.signout"
   | "auth.oauth"
   | "profile.upsert"
+  | "account.delete"
   | "parcel.create"
   | "parcel.update"
   | "parcel.delete"
+  | "parcel.report"
   | "contact.send";
 
 export async function logError(

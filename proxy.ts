@@ -31,7 +31,15 @@ export async function proxy(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isOnboarding = pathname.startsWith("/onboarding");
   const isCallback = pathname.startsWith("/auth/callback");
-  const isPublic = pathname === "/" || pathname === "/contact" || pathname.startsWith("/parcels/");
+  const isPublic =
+    pathname === "/" ||
+    pathname === "/contact" ||
+    pathname.startsWith("/parcels/") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/cookies") ||
+    pathname.startsWith("/acceptable-use") ||
+    pathname.startsWith("/disclaimer");
 
   // არ არის logged in — login-ზე
   if (!user && !isAuthPage && !isCallback && !isPublic) {

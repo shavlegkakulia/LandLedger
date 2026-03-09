@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { CookieBanner } from "@/components/CookieBanner";
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://landledger.ge";
 
@@ -56,8 +64,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ka">
-      <body>{children}</body>
+    <html lang="ka" className={plusJakarta.variable}>
+      <body>
+        {children}
+        <CookieBanner />
+      </body>
     </html>
   );
 }

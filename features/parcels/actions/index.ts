@@ -100,3 +100,23 @@ export async function getUniqueViewCount(parcelId: string): Promise<number> {
     return 0;
   }
 }
+
+export async function reportParcel(parcelId: string, reason: string, details?: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "არ ხარ ავტორიზებული" };
+
+  const { error } = await supabase.from("parcel_reports").insert({
+    reporter_id: user.id,
+    parcel_id: parcelId,
+    reason,
+    details: details || null,
+  });
+
+  if (error) {
+    await logError("parcel.report", error.message, { parcelId, userId: user.id });
+    return { error: "საჩივარი ვერ გაიგზავნა" };
+  }
+
+  return { success: true };
+}

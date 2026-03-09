@@ -42,11 +42,11 @@ export default async function ContactPage() {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 font-semibold text-primary">
+          <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 text-primary">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-9.894A11.958 11.958 0 0112 3c3.866 0 7.32 1.834 9.547 4.703L16 12H8l1 8z" />
             </svg>
-            LandLedger
+            <span className="text-lg font-bold tracking-tight">LandLedger</span>
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
@@ -158,8 +158,19 @@ export default async function ContactPage() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-16 py-8">
-        <div className="max-w-5xl mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 space-y-3 text-center">
           <p className="text-sm text-text-faint">© {new Date().getFullYear()} LandLedger. ყველა უფლება დაცულია.</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-text-faint">
+            <Link href="/terms" className="hover:text-primary transition-colors">გამოყენების პირობები</Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:text-primary transition-colors">კონფიდენციალურობა</Link>
+            <span>·</span>
+            <Link href="/cookies" className="hover:text-primary transition-colors">Cookie პოლიტიკა</Link>
+            <span>·</span>
+            <Link href="/acceptable-use" className="hover:text-primary transition-colors">გამოყენების წესები</Link>
+            <span>·</span>
+            <Link href="/disclaimer" className="hover:text-primary transition-colors">Disclaimer</Link>
+          </div>
         </div>
       </footer>
     </div>

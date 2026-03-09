@@ -150,6 +150,14 @@ export default function ContactModal({ ownerId, ownerName, hasEmail, onClose }: 
             </div>
           </div>
         )}
+
+        {/* Disclaimer */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-xs text-text-faint leading-relaxed text-center">
+            LandLedger მხოლოდ გადასცემს შეტყობინებას მიწის მფლობელს.
+            პლატფორმა არ მონაწილეობს ქონების ყიდვა-გაყიდვაში.
+          </p>
+        </div>
       </div>
     </div>
   );
