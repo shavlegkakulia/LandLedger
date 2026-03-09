@@ -17,8 +17,9 @@ export async function findMyProfile(): Promise<Profile | null> {
 
 export async function findPublicProfileById(userId: string): Promise<PublicProfile | null> {
   const supabase = await createClient();
+  // profiles_public view — show_* flags DB-დონეზე enforce-ს (rls_fixes.sql)
   const { data } = await supabase
-    .from("profiles")
+    .from("profiles_public")
     .select("id, first_name, last_name, gender, birth_date, phone, address, email, show_phone, show_address, show_gender, show_birth_date, show_email")
     .eq("id", userId)
     .single();

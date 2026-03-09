@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -25,6 +26,7 @@ function fieldCls(hasError: boolean) {
 }
 
 export function Input({ label, error, hint, required, className = "", type, ...props }: InputProps) {
+  const t = useTranslations("legal");
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
   const resolvedType = isPassword ? (showPassword ? "text" : "password") : type;
@@ -49,7 +51,7 @@ export function Input({ label, error, hint, required, className = "", type, ...p
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-text-faint hover:text-text-muted transition-colors"
-            aria-label={showPassword ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
+            aria-label={showPassword ? t("passwordHide") : t("passwordShow")}
           >
             {showPassword ? (
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

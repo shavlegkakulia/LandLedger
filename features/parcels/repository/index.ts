@@ -55,15 +55,23 @@ export async function insertParcel(payload: ParcelInsert): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-export async function updateParcelById(id: string, payload: ParcelUpdate): Promise<void> {
+export async function updateParcelById(id: string, userId: string, payload: ParcelUpdate): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("parcels").update(payload).eq("id", id);
+  const { error } = await supabase
+    .from("parcels")
+    .update(payload)
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw new Error(error.message);
 }
 
-export async function deleteParcelById(id: string): Promise<void> {
+export async function deleteParcelById(id: string, userId: string): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("parcels").delete().eq("id", id);
+  const { error } = await supabase
+    .from("parcels")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
   if (error) throw new Error(error.message);
 }
 

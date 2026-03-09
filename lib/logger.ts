@@ -8,6 +8,7 @@ type LogAction =
   | "auth.signout"
   | "auth.oauth"
   | "profile.upsert"
+  | "profile.avatar_upload"
   | "account.delete"
   | "parcel.create"
   | "parcel.update"

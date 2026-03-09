@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logError } from "@/lib/logger";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
@@ -12,7 +14,7 @@ export async function signUp(formData: FormData) {
   const { error } = await supabase.auth.signUp({ email, password });
   if (error) {
     await logError("auth.signup", error.message, { email });
-    return { error: error.message };
+    return { error: "რეგისტრაცია ვერ მოხერხდა. სცადეთ თავიდან." };
   }
 
   redirect("/dashboard");
@@ -26,7 +28,7 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     await logError("auth.signin", error.message, { email });
-    return { error: error.message };
+    return { error: "ელ-ფოსტა ან პაროლი არასწორია" };
   }
 
   redirect("/dashboard");
@@ -43,12 +45,12 @@ export async function signInWithGoogle() {
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: "http://localhost:3001/auth/callback" },
+    options: { redirectTo: `${SITE_URL}/auth/callback` },
   });
 
   if (error) {
     await logError("auth.oauth", error.message, { provider: "google" });
-    return { error: error.message };
+    return { error: "Google-ით შესვლა ვერ მოხერხდა" };
   }
   if (data.url) redirect(data.url);
 }
@@ -59,14 +61,14 @@ export async function signInWithFacebook() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "facebook",
     options: {
-      redirectTo: "http://localhost:3001/auth/callback",
+      redirectTo: `${SITE_URL}/auth/callback`,
       scopes: "email,public_profile",
     },
   });
 
   if (error) {
     await logError("auth.oauth", error.message, { provider: "facebook" });
-    return { error: error.message };
+    return { error: "Facebook-ით შესვლა ვერ მოხერხდა" };
   }
   if (data.url) redirect(data.url);
 }

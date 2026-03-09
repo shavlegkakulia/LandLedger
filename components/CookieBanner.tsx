@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 
 const COOKIE_KEY = "ll_cookie_consent";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations("cookie");
+  const locale = useLocale();
 
   useEffect(() => {
     const consent = localStorage.getItem(COOKIE_KEY);
@@ -35,27 +38,21 @@ export function CookieBanner() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text mb-1">Cookies</p>
+            <p className="text-sm font-semibold text-text mb-1">{t("title")}</p>
             <p className="text-xs text-text-muted leading-relaxed">
-              ვიყენებთ cookies-ს ავტორიზაციისა და სერვისის გაუმჯობესებისთვის.{" "}
-              <Link href="/cookies" className="text-primary hover:underline">
-                Cookie პოლიტიკა
+              {t("description")}{" "}
+              <Link href={`/${locale}/cookies`} className="text-primary hover:underline">
+                {t("policy")}
               </Link>
             </p>
           </div>
         </div>
         <div className="flex gap-2 mt-4">
-          <button
-            onClick={decline}
-            className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-background transition-colors"
-          >
-            მხოლოდ აუცილებელი
+          <button onClick={decline} className="flex-1 py-2 rounded-xl border border-border text-xs text-text-muted hover:bg-background transition-colors">
+            {t("essentialOnly")}
           </button>
-          <button
-            onClick={accept}
-            className="flex-1 py-2 rounded-xl bg-primary text-white text-xs font-medium hover:bg-primary-hover transition-colors"
-          >
-            ყველას მიღება
+          <button onClick={accept} className="flex-1 py-2 rounded-xl bg-primary text-white text-xs font-medium hover:bg-primary-hover transition-colors">
+            {t("acceptAll")}
           </button>
         </div>
       </div>

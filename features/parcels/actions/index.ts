@@ -13,6 +13,7 @@ import {
   upsertParcelView,
   countUniqueViews,
 } from "@/features/parcels/repository";
+import { parcelSchema } from "@/features/parcels/schemas";
 import type { ParcelFilters } from "@/features/parcels/types";
 
 export async function getParcels(filters?: ParcelFilters) {
@@ -28,20 +29,25 @@ export async function createParcel(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "არ ხარ ავტორიზებული" };
 
+  const parsed = parcelSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0]?.message ?? "შეყვანილი მონაცემები არასწორია" };
+  }
+
   try {
     await insertParcel({
       user_id: user.id,
-      cadastral_code: formData.get("cadastral_code") as string,
-      address: formData.get("address") as string,
-      area_sqm: formData.get("area_sqm") ? Number(formData.get("area_sqm")) : null,
-      region: (formData.get("region") as string) || null,
-      municipality: (formData.get("municipality") as string) || null,
-      notes: (formData.get("notes") as string) || null,
+      cadastral_code: parsed.data.cadastral_code,
+      address: parsed.data.address,
+      area_sqm: parsed.data.area_sqm ? Number(parsed.data.area_sqm) : null,
+      region: parsed.data.region || null,
+      municipality: parsed.data.municipality || null,
+      notes: parsed.data.notes || null,
     });
   } catch (e) {
     const msg = (e as Error).message;
-    await logError("parcel.create", msg, { userId: user.id, cadastral_code: formData.get("cadastral_code") });
-    return { error: msg };
+    await logError("parcel.create", msg, { userId: user.id, cadastral_code: parsed.data.cadastral_code });
+    return { error: "ნაკვეთის შენახვა ვერ მოხერხდა" };
   }
 
   revalidatePath("/dashboard");
@@ -49,19 +55,28 @@ export async function createParcel(formData: FormData) {
 }
 
 export async function updateParcel(id: string, formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "არ ხარ ავტორიზებული" };
+
+  const parsed = parcelSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.errors[0]?.message ?? "შეყვანილი მონაცემები არასწორია" };
+  }
+
   try {
-    await updateParcelById(id, {
-      cadastral_code: formData.get("cadastral_code") as string,
-      address: formData.get("address") as string,
-      area_sqm: formData.get("area_sqm") ? Number(formData.get("area_sqm")) : null,
-      region: (formData.get("region") as string) || null,
-      municipality: (formData.get("municipality") as string) || null,
-      notes: (formData.get("notes") as string) || null,
+    await updateParcelById(id, user.id, {
+      cadastral_code: parsed.data.cadastral_code,
+      address: parsed.data.address,
+      area_sqm: parsed.data.area_sqm ? Number(parsed.data.area_sqm) : null,
+      region: parsed.data.region || null,
+      municipality: parsed.data.municipality || null,
+      notes: parsed.data.notes || null,
     });
   } catch (e) {
     const msg = (e as Error).message;
-    await logError("parcel.update", msg, { parcelId: id });
-    return { error: msg };
+    await logError("parcel.update", msg, { parcelId: id, userId: user.id });
+    return { error: "ნაკვეთის განახლება ვერ მოხერხდა" };
   }
 
   revalidatePath("/dashboard");
@@ -69,18 +84,21 @@ export async function updateParcel(id: string, formData: FormData) {
 }
 
 export async function deleteParcel(id: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "არ ხარ ავტორიზებული" };
+
   try {
-    await deleteParcelById(id);
+    await deleteParcelById(id, user.id);
   } catch (e) {
     const msg = (e as Error).message;
-    await logError("parcel.delete", msg, { parcelId: id });
-    return { error: msg };
+    await logError("parcel.delete", msg, { parcelId: id, userId: user.id });
+    return { error: "ნაკვეთის წაშლა ვერ მოხერხდა" };
   }
 
   revalidatePath("/dashboard");
 }
 
-// ნახვის ჩაწერა — საკუთარი ნახვა არ ითვლება
 export async function recordParcelView(parcelId: string, ownerId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -89,7 +107,7 @@ export async function recordParcelView(parcelId: string, ownerId: string) {
   try {
     await upsertParcelView(parcelId, user.id);
   } catch {
-    // view ჩაწერა არ არის კრიტიკული — silent fail
+    // view ჩაწერა კრიტიკული არ არის — silent fail
   }
 }
 
@@ -106,11 +124,14 @@ export async function reportParcel(parcelId: string, reason: string, details?: s
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "არ ხარ ავტორიზებული" };
 
+  const cleanReason = String(reason).slice(0, 50);
+  const cleanDetails = details ? String(details).slice(0, 500) : null;
+
   const { error } = await supabase.from("parcel_reports").insert({
     reporter_id: user.id,
     parcel_id: parcelId,
-    reason,
-    details: details || null,
+    reason: cleanReason,
+    details: cleanDetails,
   });
 
   if (error) {

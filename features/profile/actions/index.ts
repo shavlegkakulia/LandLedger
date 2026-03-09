@@ -18,6 +18,15 @@ export async function getPublicProfile(userId: string) {
   return findPublicProfileById(userId);
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export async function sendContactMessage({
   ownerId,
   message,
@@ -33,6 +42,9 @@ export async function sendContactMessage({
   if (!user) return { error: "არ ხარ ავტორიზებული" };
   if (user.id === ownerId) return { error: "საკუთარ თავს ვერ დაუკავშირდები" };
 
+  // Message length limit — max 2000 სიმბოლო
+  const cleanMessage = String(message).slice(0, 2000).trim();
+
   // Rate limit: 24 საათში max 3 შეტყობინება ერთ მფლობელზე
   const { data: withinLimit } = await supabase.rpc("check_contact_rate_limit", {
     p_sender_id: user.id,
@@ -43,7 +55,7 @@ export async function sendContactMessage({
   }
 
   const { data: owner } = await supabase
-    .from("profiles")
+    .from("profiles_public")
     .select("first_name, last_name, email, show_email")
     .eq("id", ownerId)
     .single();
@@ -64,7 +76,12 @@ export async function sendContactMessage({
 
   const senderContact = [sender?.email, sender?.phone].filter(Boolean).join(" / ");
   const staticText = `LandLedger-ის გზავნილი: ${senderName} დაგიკავშირდა ნაკვეთის საკითხზე.`;
-  const fullMessage = message.trim() ? `${staticText}\n\n${message.trim()}` : staticText;
+  const fullMessage = cleanMessage ? `${staticText}\n\n${cleanMessage}` : staticText;
+
+  // HTML-ი escape-ით — injection-ის თავიდან ასაცილებლად
+  const escapedMessage = escapeHtml(cleanMessage);
+  const escapedSenderName = escapeHtml(senderName);
+  const escapedSenderContact = escapeHtml(senderContact);
 
   const { error } = await resend.emails.send({
     from: "LandLedger <onboarding@resend.dev>",
@@ -77,12 +94,12 @@ export async function sendContactMessage({
         <p style="color:#6b7280;font-size:14px;margin-top:0">საკადასტრო მონაცემების სისტემა</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0"/>
         <p style="font-size:15px;color:#111827">
-          <strong>${senderName}</strong> დაგიკავშირდა ნაკვეთის საკითხზე.
+          <strong>${escapedSenderName}</strong> დაგიკავშირდა ნაკვეთის საკითხზე.
         </p>
-        ${message.trim() ? `<blockquote style="border-left:3px solid #166534;margin:16px 0;padding:12px 16px;background:#f0fdf4;color:#374151;border-radius:4px">${message.trim()}</blockquote>` : ""}
+        ${escapedMessage ? `<blockquote style="border-left:3px solid #166534;margin:16px 0;padding:12px 16px;background:#f0fdf4;color:#374151;border-radius:4px">${escapedMessage}</blockquote>` : ""}
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0"/>
         <p style="font-size:13px;color:#6b7280">
-          გამგზავნის საკონტაქტო: <strong>${senderContact}</strong>
+          გამგზავნის საკონტაქტო: <strong>${escapedSenderContact}</strong>
         </p>
       </div>
     `,
@@ -93,7 +110,7 @@ export async function sendContactMessage({
     owner_id: ownerId,
     status: error ? "failed" : "sent",
     error_msg: error ? `${error.name}: ${error.message}` : null,
-    message: message.trim() || null,
+    message: cleanMessage || null,
   });
 
   if (error) {
@@ -105,6 +122,14 @@ export async function sendContactMessage({
   return { success: true };
 }
 
+const ALLOWED_AVATAR_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+};
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+
 export async function upsertProfile(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -114,13 +139,23 @@ export async function upsertProfile(formData: FormData) {
 
   const avatarFile = formData.get("avatar") as File | null;
   if (avatarFile && avatarFile.size > 0) {
-    const ext = avatarFile.name.split(".").pop() ?? "jpg";
+    if (!ALLOWED_AVATAR_TYPES[avatarFile.type]) {
+      return { error: "სურათის ფორმატი არ არის მხარდაჭერილი (JPG, PNG, WEBP, GIF)" };
+    }
+    if (avatarFile.size > MAX_AVATAR_SIZE) {
+      return { error: "სურათი ზედმეტად დიდია (მაქს. 5MB)" };
+    }
+
+    const ext = ALLOWED_AVATAR_TYPES[avatarFile.type];
     const path = `${user.id}/avatar.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, avatarFile, { upsert: true, contentType: avatarFile.type });
 
-    if (uploadError) return { error: uploadError.message };
+    if (uploadError) {
+      await logError("profile.avatar_upload", uploadError.message, { userId: user.id });
+      return { error: "სურათის ატვირთვა ვერ მოხერხდა" };
+    }
 
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     avatar_url = `${urlData.publicUrl}?t=${Date.now()}`;
@@ -145,9 +180,8 @@ export async function upsertProfile(formData: FormData) {
     });
   } catch (e) {
     const msg = (e as Error).message;
-    console.error("[upsertProfile] error:", msg);
     await logError("profile.upsert", msg, { userId: user.id });
-    return { error: msg };
+    return { error: "პროფილის შენახვა ვერ მოხერხდა" };
   }
 
   revalidatePath("/dashboard");
@@ -159,9 +193,6 @@ export async function deleteAccount() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "არ ხარ ავტორიზებული" };
 
-  // contact_logs, parcel_views, parcels — cascade-ით იშლება
-  // profiles — cascade-ით იშლება
-  // auth.users-ს წაშლა service_role-ს სჭირდება; server action-ი admin client-ს იყენებს
   const { createClient: createAdminClient } = await import("@supabase/supabase-js");
   const admin = createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
