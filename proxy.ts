@@ -30,30 +30,29 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isOnboarding = pathname.startsWith("/onboarding");
+  const isCallback = pathname.startsWith("/auth/callback");
 
   // არ არის logged in — login-ზე
-  if (!user && !isAuthPage) {
+  if (!user && !isAuthPage && !isCallback) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
   // logged in + auth page — dashboard-ზე
-  if (user && isAuthPage) {
+  if (user && isAuthPage && !isCallback) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
   // logged in — შევამოწმოთ პროფილი შევსებულია თუ არა
-  if (user && !isOnboarding && !isAuthPage) {
-    const { data: profile, error: profileError } = await supabase
+  if (user && !isOnboarding && !isAuthPage && !isCallback) {
+    const { data: profile } = await supabase
       .from("profiles")
       .select("profile_completed")
       .eq("id", user.id)
       .single();
-
-    console.log("[proxy] profile_completed:", profile?.profile_completed, "error:", profileError?.message);
 
     if (!profile?.profile_completed) {
       const url = request.nextUrl.clone();

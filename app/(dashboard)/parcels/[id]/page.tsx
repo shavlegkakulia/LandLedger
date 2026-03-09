@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { PublicProfile } from "@/features/profile/types";
+import OwnerCard from "@/features/parcels/components/OwnerCard";
 
 export default async function ParcelDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,10 +17,8 @@ export default async function ParcelDetailPage({ params }: { params: Promise<{ i
   const isOwner = user?.id === parcel.user_id;
   const owner = await getPublicProfile(parcel.user_id);
 
-  // view ჩაწერა async — არ ვაყოვნებთ page render-ს
   void recordParcelView(parcel.id, parcel.user_id);
 
-  // view count მხოლოდ მფლობელს ვუჩვენებთ
   const viewCount = isOwner ? await getUniqueViewCount(parcel.id) : null;
 
   return (
@@ -70,7 +69,7 @@ export default async function ParcelDetailPage({ params }: { params: Promise<{ i
         )}
       </div>
 
-      {owner && <OwnerCard owner={owner} isOwner={isOwner} viewCount={viewCount} />}
+      {owner && <OwnerCard owner={owner} isOwner={isOwner} />}
     </div>
   );
 }
@@ -80,40 +79,6 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
     <div className="px-5 py-3 flex gap-4">
       <dt className="text-sm text-text-muted w-36 shrink-0">{label}</dt>
       <dd className={`text-sm text-text font-medium ${mono ? "font-mono" : ""}`}>{value}</dd>
-    </div>
-  );
-}
-
-function OwnerCard({ owner, isOwner, viewCount }: { owner: PublicProfile; isOwner: boolean; viewCount: number | null }) {
-  const fields = [
-    { label: "სქესი", value: owner.gender === "male" ? "მამრობითი" : owner.gender === "female" ? "მდედრობითი" : owner.gender === "other" ? "სხვა" : null, show: owner.show_gender },
-    { label: "დაბადების თარიღი", value: owner.birth_date ? new Date(owner.birth_date).toLocaleDateString("ka-GE") : null, show: owner.show_birth_date },
-    { label: "მობილური", value: owner.phone, show: owner.show_phone },
-    { label: "მისამართი", value: owner.address, show: owner.show_address },
-    { label: "ელ-ფოსტა", value: owner.email, show: owner.show_email },
-  ].filter((f) => (isOwner ? true : f.show) && f.value);
-
-  return (
-    <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-border bg-background flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-text-muted">მფლობელი</h2>
-        {isOwner && <Link href="/profile" className="text-xs text-primary hover:underline">პროფილის რედაქტირება</Link>}
-      </div>
-      <div className="px-5 py-4">
-        <p className="font-semibold text-text">{owner.first_name} {owner.last_name}</p>
-        {fields.length > 0 ? (
-          <dl className="mt-3 space-y-2">
-            {fields.map((f) => (
-              <div key={f.label} className="flex gap-4">
-                <dt className="text-sm text-text-muted w-36 shrink-0">{f.label}</dt>
-                <dd className="text-sm text-text">{f.value}</dd>
-              </div>
-            ))}
-          </dl>
-        ) : !isOwner && (
-          <p className="text-sm text-text-faint mt-2">მფლობელმა დამატებითი ინფო არ გაასაჯაროვა</p>
-        )}
-      </div>
     </div>
   );
 }

@@ -1,13 +1,23 @@
+import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/features/profile/actions";
 import ProfileForm from "@/features/profile/components/ProfileForm";
 import { redirect } from "next/navigation";
 
 export default async function OnboardingPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const profile = await getMyProfile();
 
-  console.log("[onboarding] profile:", JSON.stringify(profile));
-
   if (profile?.profile_completed) redirect("/dashboard");
+
+  const socialAvatarUrl =
+    (user?.user_metadata?.avatar_url as string | undefined) ??
+    (user?.user_metadata?.picture as string | undefined) ??
+    null;
+
+  const profileWithAvatar = profile
+    ? { ...profile, avatar_url: profile.avatar_url ?? socialAvatarUrl }
+    : { avatar_url: socialAvatarUrl } as Parameters<typeof ProfileForm>[0]["profile"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-light to-primary-muted flex items-center justify-center p-4">
@@ -21,7 +31,7 @@ export default async function OnboardingPage() {
           <h1 className="text-2xl font-bold text-text">კეთილი იყოს შენი მობრძანება!</h1>
           <p className="text-text-muted text-sm mt-1">მთავარ გვერდზე გადასასვლელად შეავსე პროფილი</p>
         </div>
-        <ProfileForm profile={profile} />
+        <ProfileForm profile={profileWithAvatar} />
       </div>
     </div>
   );

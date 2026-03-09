@@ -4,14 +4,24 @@ import { signIn } from "@/features/auth/actions";
 import Link from "next/link";
 import { useActionState } from "react";
 import SocialButtons from "@/features/auth/components/SocialButtons";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { Input } from "@/components/ui/Input";
+import { SubmitButton } from "@/components/ui/Button";
 
-export default function LoginForm() {
-  const [state, action, pending] = useActionState(
+const oauthErrorMessages: Record<string, string> = {
+  oauth_failed: "ავტორიზაცია ვერ მოხერხდა. სცადე თავიდან.",
+  duplicate_email: "ამ ელ-ფოსტით უკვე არსებობს ანგარიში. შედი ელ-ფოსტა/პაროლით, ან წაშალე ძველი ანგარიში.",
+};
+
+export default function LoginForm({ oauthError }: { oauthError?: string }) {
+  const [state, action] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       return (await signIn(formData)) ?? null;
     },
     null
   );
+
+  const errorMessage = state?.error ?? (oauthError ? (oauthErrorMessages[oauthError] ?? "ავტორიზაცია ვერ მოხერხდა.") : null);
 
   return (
     <div className="bg-surface rounded-2xl shadow-lg p-8">
@@ -26,33 +36,10 @@ export default function LoginForm() {
       </div>
 
       <form action={action} className="space-y-4">
-        {state?.error && (
-          <div className="bg-danger-light border border-danger-border text-danger text-sm rounded-lg px-4 py-3">
-            {state.error}
-          </div>
-        )}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-text mb-1">ელ-ფოსტა</label>
-          <input
-            id="email" name="email" type="email" required autoComplete="email"
-            className="w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-border-focus"
-            placeholder="you@example.com"
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-text mb-1">პაროლი</label>
-          <input
-            id="password" name="password" type="password" required autoComplete="current-password"
-            className="w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-border-focus"
-            placeholder="••••••••"
-          />
-        </div>
-        <button
-          type="submit" disabled={pending}
-          className="w-full bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
-        >
-          {pending ? "მიმდინარეობს..." : "შესვლა"}
-        </button>
+        <ErrorBanner message={errorMessage} />
+        <Input label="ელ-ფოსტა" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
+        <Input label="პაროლი" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
+        <SubmitButton loadingText="მიმდინარეობს...">შესვლა</SubmitButton>
       </form>
 
       <SocialButtons />

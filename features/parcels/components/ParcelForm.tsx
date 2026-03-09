@@ -6,6 +6,10 @@ import { parcelSchema, type ParcelFormValues } from "@/features/parcels/schemas"
 import { useTransition, useState } from "react";
 import Link from "next/link";
 import type { Parcel } from "@/features/parcels/types";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Input";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface ParcelFormProps {
   parcel?: Parcel;
@@ -15,6 +19,9 @@ interface ParcelFormProps {
 export default function ParcelForm({ parcel, action }: ParcelFormProps) {
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [pendingValues, setPendingValues] = useState<ParcelFormValues | null>(null);
+
+  const isEdit = !!parcel;
 
   const { register, handleSubmit, formState: { errors } } = useForm<ParcelFormValues>({
     resolver: zodResolver(parcelSchema),
@@ -29,6 +36,14 @@ export default function ParcelForm({ parcel, action }: ParcelFormProps) {
   });
 
   function onSubmit(values: ParcelFormValues) {
+    if (isEdit) {
+      setPendingValues(values);
+    } else {
+      doSubmit(values);
+    }
+  }
+
+  function doSubmit(values: ParcelFormValues) {
     setServerError(null);
     const fd = new FormData();
     Object.entries(values).forEach(([k, v]) => { if (v != null) fd.append(k, String(v)); });
@@ -39,65 +54,78 @@ export default function ParcelForm({ parcel, action }: ParcelFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-surface rounded-2xl border border-border shadow-sm p-6 space-y-5">
-      {serverError && (
-        <div className="bg-danger-light border border-danger-border text-danger text-sm rounded-lg px-4 py-3">
-          {serverError}
-        </div>
-      )}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-surface rounded-2xl border border-border shadow-sm p-6 space-y-5">
+        <ErrorBanner message={serverError} />
 
-      <div className="grid sm:grid-cols-2 gap-5">
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-text mb-1">საკადასტრო კოდი <span className="text-danger">*</span></label>
-          <input {...register("cadastral_code")} className={inputCls(!!errors.cadastral_code)} placeholder="01.10.01.001.001" />
-          <FieldError msg={errors.cadastral_code?.message} />
+        <div className="grid sm:grid-cols-2 gap-5">
+          <div className="sm:col-span-2">
+            <Input
+              label="საკადასტრო კოდი" required
+              placeholder="01.10.01.001.001"
+              error={errors.cadastral_code?.message}
+              {...register("cadastral_code")}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Input
+              label="მისამართი" required
+              placeholder="თბილისი, ვაკე, ი. ჭავჭავაძის გამზ. 12"
+              error={errors.address?.message}
+              {...register("address")}
+            />
+          </div>
+          <Input
+            label="ფართობი (მ²)"
+            type="number" step="0.01" min="0"
+            placeholder="მ²"
+            error={errors.area_sqm?.message}
+            {...register("area_sqm")}
+          />
+          <Input
+            label="რეგიონი"
+            placeholder="თბილისი"
+            error={errors.region?.message}
+            {...register("region")}
+          />
+          <Input
+            label="მუნიციპალიტეტი"
+            placeholder="ვაკე-საბურთალო"
+            error={errors.municipality?.message}
+            {...register("municipality")}
+          />
+          <div className="sm:col-span-2">
+            <Textarea
+              label="შენიშვნები"
+              rows={3}
+              placeholder="დამატებითი ინფორმაცია..."
+              error={errors.notes?.message}
+              {...register("notes")}
+            />
+          </div>
         </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-text mb-1">მისამართი <span className="text-danger">*</span></label>
-          <input {...register("address")} className={inputCls(!!errors.address)} placeholder="თბილისი, ვაკე, ი. ჭავჭავაძის გამზ. 12" />
-          <FieldError msg={errors.address?.message} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">ფართობი (მ²)</label>
-          <input {...register("area_sqm")} type="number" step="0.01" min="0" className={inputCls(!!errors.area_sqm)} placeholder="მ²" />
-          <FieldError msg={errors.area_sqm?.message} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">რეგიონი</label>
-          <input {...register("region")} className={inputCls(!!errors.region)} placeholder="თბილისი" />
-          <FieldError msg={errors.region?.message} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">მუნიციპალიტეტი</label>
-          <input {...register("municipality")} className={inputCls(!!errors.municipality)} placeholder="ვაკე-საბურთალო" />
-          <FieldError msg={errors.municipality?.message} />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-text mb-1">შენიშვნები</label>
-          <textarea {...register("notes")} rows={3} className={inputCls(!!errors.notes) + " resize-none"} placeholder="დამატებითი ინფორმაცია..." />
-          <FieldError msg={errors.notes?.message} />
-        </div>
-      </div>
 
-      <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={isPending} className="bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors">
-          {isPending ? "შენახვა..." : "შენახვა"}
-        </button>
-        <Link href="/dashboard" className="text-sm text-text-muted hover:text-text px-4 py-2.5 rounded-lg hover:bg-background transition-colors">
-          გაუქმება
-        </Link>
-      </div>
-    </form>
+        <div className="flex items-center gap-3 pt-2">
+          <Button type="submit" loading={isPending} className="w-auto">
+            შენახვა
+          </Button>
+          <Link href="/dashboard" className="text-sm text-text-muted hover:text-text px-4 py-2.5 rounded-lg hover:bg-background transition-colors">
+            გაუქმება
+          </Link>
+        </div>
+      </form>
+
+      <ConfirmModal
+        open={!!pendingValues}
+        title="ცვლილებების შენახვა"
+        description="დარწმუნებული ხარ, რომ გინდა ამ ცვლილებების შენახვა?"
+        confirmLabel="შენახვა"
+        cancelLabel="გაუქმება"
+        variant="primary"
+        loading={isPending}
+        onConfirm={() => { if (pendingValues) doSubmit(pendingValues); }}
+        onCancel={() => setPendingValues(null)}
+      />
+    </>
   );
-}
-
-function FieldError({ msg }: { msg?: string }) {
-  if (!msg) return null;
-  return <p className="mt-1 text-xs text-danger">{msg}</p>;
-}
-
-function inputCls(hasError: boolean) {
-  return `w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-colors ${
-    hasError ? "border-danger-border focus:ring-danger/30 bg-danger-light" : "border-border focus:ring-primary/30 focus:border-border-focus"
-  }`;
 }

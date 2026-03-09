@@ -6,6 +6,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, avatar_url")
+    .eq("id", user?.id ?? "")
+    .single();
+
+  const avatarUrl = profile?.avatar_url
+    ?? (user?.user_metadata?.avatar_url as string | undefined)
+    ?? (user?.user_metadata?.picture as string | undefined)
+    ?? null;
+
+  const displayName = profile?.first_name
+    ? `${profile.first_name} ${profile.last_name ?? ""}`.trim()
+    : (user?.user_metadata?.full_name as string | undefined)
+      ?? (user?.user_metadata?.name as string | undefined)
+      ?? user?.email
+      ?? "";
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-surface border-b border-border sticky top-0 z-10">
@@ -16,7 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </svg>
             LandLedger
           </Link>
-          <HeaderNav email={user?.email} />
+          <HeaderNav email={user?.email} displayName={displayName} avatarUrl={avatarUrl} />
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>

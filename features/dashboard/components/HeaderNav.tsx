@@ -4,7 +4,7 @@ import { signOut } from "@/features/auth/actions";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
-export default function HeaderNav({ email }: { email: string | undefined }) {
+export default function HeaderNav({ email, displayName, avatarUrl }: { email: string | undefined; displayName?: string; avatarUrl?: string | null }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -16,7 +16,11 @@ export default function HeaderNav({ email }: { email: string | undefined }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const initials = email ? email.slice(0, 2).toUpperCase() : "?";
+  const name = displayName || email || "";
+  const parts = name.trim().split(/\s+/);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase() || "?";
 
   return (
     <div className="relative" ref={ref}>
@@ -24,12 +28,14 @@ export default function HeaderNav({ email }: { email: string | undefined }) {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg hover:bg-primary-light transition-colors group"
       >
-        <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center shrink-0">
-          {initials}
-        </div>
+        <div className="w-7 h-7 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center shrink-0 overflow-hidden">
+            {avatarUrl
+              ? <img src={avatarUrl} alt={displayName ?? email} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              : initials}
+          </div>
         <span className="text-sm text-text-muted group-hover:text-primary hidden sm:block max-w-[160px] truncate">
-          {email}
-        </span>
+            {displayName || email}
+          </span>
         <svg
           className={`w-4 h-4 text-text-faint transition-transform ${open ? "rotate-180" : ""}`}
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -42,7 +48,7 @@ export default function HeaderNav({ email }: { email: string | undefined }) {
         <div className="absolute right-0 top-full mt-2 w-52 bg-surface border border-border rounded-xl shadow-lg overflow-hidden z-50">
           <div className="px-4 py-3 border-b border-border bg-background">
             <p className="text-xs text-text-faint">შესულია როგორც</p>
-            <p className="text-sm font-medium text-text truncate mt-0.5">{email}</p>
+            <p className="text-sm font-medium text-text truncate mt-0.5">{displayName || email}</p>
           </div>
           <div className="py-1">
             <Link

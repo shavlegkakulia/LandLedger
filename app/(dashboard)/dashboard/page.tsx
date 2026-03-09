@@ -1,11 +1,10 @@
 import { getParcels } from "@/features/parcels/actions";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { deleteParcel } from "@/features/parcels/actions";
-import type { Parcel } from "@/features/parcels/types";
 import ParcelFilters from "@/features/parcels/components/ParcelFilters";
 import { getMyProfile } from "@/features/profile/actions";
 import { redirect } from "next/navigation";
+import { ParcelCard } from "@/features/parcels/components/ParcelCard";
 
 interface Props {
   searchParams: Promise<{ mine?: string; region?: string; municipality?: string; cadastral?: string; page?: string }>;
@@ -148,45 +147,3 @@ function PaginationBar({ page, totalPages, total, pageSize, searchParams }: {
   );
 }
 
-function ParcelCard({ parcel, currentUserId }: { parcel: Parcel; currentUserId: string }) {
-  const isOwner = parcel.user_id === currentUserId;
-  return (
-    <div className="bg-surface rounded-xl border border-border shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 bg-primary-light text-primary text-xs font-medium px-2.5 py-1 rounded-full font-mono">
-          {parcel.cadastral_code}
-        </span>
-        <div className="flex items-center gap-1.5">
-          {parcel.area_sqm && <span className="text-xs text-text-muted">{parcel.area_sqm} მ²</span>}
-          {isOwner && <span className="text-xs bg-badge-mine text-badge-mine-text px-2 py-0.5 rounded-full">ჩემი</span>}
-        </div>
-      </div>
-      <div>
-        <p className="font-medium text-text text-sm leading-snug">{parcel.address}</p>
-        {(parcel.region || parcel.municipality) && (
-          <p className="text-xs text-text-muted mt-0.5">{[parcel.region, parcel.municipality].filter(Boolean).join(", ")}</p>
-        )}
-      </div>
-      {parcel.notes && (
-        <p className="text-xs text-text-muted bg-background rounded-lg px-3 py-2 line-clamp-2">{parcel.notes}</p>
-      )}
-      <div className="flex items-center gap-2 pt-1 border-t border-border mt-auto">
-        <Link href={`/parcels/${parcel.id}`} className="flex-1 text-center text-xs font-medium text-text-muted hover:text-primary py-1.5 rounded-md hover:bg-primary-light transition-colors">
-          დეტალები
-        </Link>
-        {isOwner && (
-          <>
-            <Link href={`/parcels/${parcel.id}/edit`} className="flex-1 text-center text-xs font-medium text-text-muted hover:text-primary py-1.5 rounded-md hover:bg-primary-light transition-colors">
-              რედაქტირება
-            </Link>
-            <form action={async () => { "use server"; await deleteParcel(parcel.id); }} className="flex-1">
-              <button type="submit" className="w-full text-xs font-medium text-text-muted hover:text-danger py-1.5 rounded-md hover:bg-danger-light transition-colors">
-                წაშლა
-              </button>
-            </form>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}

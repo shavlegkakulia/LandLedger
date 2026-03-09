@@ -1,24 +1,26 @@
+import { createClient } from "@/lib/supabase/server";
 import { getMyProfile } from "@/features/profile/actions";
 import ProfileForm from "@/features/profile/components/ProfileForm";
-import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function ProfilePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   const profile = await getMyProfile();
+
+  const socialAvatarUrl =
+    (user?.user_metadata?.avatar_url as string | undefined) ??
+    (user?.user_metadata?.picture as string | undefined) ??
+    null;
+
+  const profileWithAvatar = profile
+    ? { ...profile, avatar_url: profile.avatar_url ?? socialAvatarUrl }
+    : null;
 
   return (
     <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <Link href="/dashboard" className="text-text-faint hover:text-text-muted transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-text">პროფილი</h1>
-          <p className="text-text-muted text-sm">მართე შენი ინფო და კონფიდენციალობა</p>
-        </div>
-      </div>
-      <ProfileForm profile={profile} />
+      <BackLink href="/dashboard" title="პროფილი" subtitle="მართე შენი ინფო და კონფიდენციალობა" />
+      <ProfileForm profile={profileWithAvatar} />
     </div>
   );
 }

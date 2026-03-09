@@ -7,6 +7,7 @@ export interface Profile {
   phone: string | null;
   address: string | null;
   email: string | null;
+  avatar_url: string | null;
   show_phone: boolean;
   show_address: boolean;
   show_gender: boolean;

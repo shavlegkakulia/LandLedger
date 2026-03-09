@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -32,15 +31,28 @@ export async function signOut() {
   redirect("/login");
 }
 
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: "http://localhost:3001/auth/callback",
+    },
+  });
+
+  if (error) return { error: error.message };
+  if (data.url) redirect(data.url);
+}
+
 export async function signInWithFacebook() {
   const supabase = await createClient();
-  const headersList = await headers();
-  const origin = headersList.get("origin") ?? "http://localhost:3001";
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "facebook",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: "http://localhost:3001/auth/callback",
+      scopes: "email,public_profile",
     },
   });
 
