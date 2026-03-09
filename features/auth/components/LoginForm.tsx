@@ -2,16 +2,20 @@
 
 import { signIn } from "@/features/auth/actions";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import SocialButtons from "@/features/auth/components/SocialButtons";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { Input } from "@/components/ui/Input";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { SubmitButton } from "@/components/ui/Button";
+import { useRememberedEmail } from "@/features/auth/hooks/useRememberedEmail";
 
 export default function LoginForm({ oauthError, next }: { oauthError?: string; next?: string }) {
   const t = useTranslations("auth");
   const locale = useLocale();
+  const [rememberMe, setRememberMe] = useState(true);
+  const { email: savedEmail, save: saveEmail, clear: clearEmail } = useRememberedEmail();
 
   const oauthErrorMessages: Record<string, string> = {
     oauth_failed: t("errorOauthFailed"),
@@ -20,6 +24,15 @@ export default function LoginForm({ oauthError, next }: { oauthError?: string; n
 
   const [state, action] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
+      const email = formData.get("email") as string;
+      const remember = formData.get("rememberMe") === "1";
+
+      if (remember && email) {
+        saveEmail(email);
+      } else {
+        clearEmail();
+      }
+
       return (await signIn(formData)) ?? null;
     },
     null
@@ -41,8 +54,33 @@ export default function LoginForm({ oauthError, next }: { oauthError?: string; n
 
       <form action={action} className="space-y-4">
         <ErrorBanner message={errorMessage} />
-        <Input label={t("email")} name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
-        <Input label={t("password")} name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
+        <Input
+          label={t("email")}
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          defaultValue={savedEmail}
+          key={savedEmail}
+        />
+        <Input
+          label={t("password")}
+          name="password"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="••••••••"
+        />
+        <div className="flex items-center justify-between">
+          <Checkbox
+            id="remember-me"
+            checked={rememberMe}
+            onChange={e => setRememberMe(e.target.checked)}
+            label={t("rememberMe")}
+          />
+        </div>
+        <input type="hidden" name="rememberMe" value={rememberMe ? "1" : "0"} />
         <SubmitButton loadingText={t("loading")}>{t("loginButton")}</SubmitButton>
       </form>
 

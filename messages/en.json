@@ -55,6 +55,7 @@
     "password": "Password",
     "passwordHint": "Min 8 characters, uppercase, lowercase, special character",
     "loginButton": "Sign In",
+    "rememberMe": "Remember me",
     "registerButton": "Sign Up",
     "loading": "Loading...",
     "noAccount": "Don't have an account?",

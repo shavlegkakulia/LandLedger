@@ -3,11 +3,10 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+type InputProps = React.ComponentPropsWithRef<"input"> & {
   label?: string;
   error?: string;
   hint?: string;
-  required?: boolean;
 }
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -25,7 +24,7 @@ function fieldCls(hasError: boolean) {
   }`;
 }
 
-export function Input({ label, error, hint, required, className = "", type, ...props }: InputProps) {
+export function Input({ label, error, hint, required, className = "", type, ref, ...props }: InputProps) {
   const t = useTranslations("legal");
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
@@ -41,6 +40,7 @@ export function Input({ label, error, hint, required, className = "", type, ...p
       )}
       <div className="relative">
         <input
+          ref={ref}
           type={resolvedType}
           className={`${fieldCls(!!error)} ${isPassword ? "pr-10" : ""} ${className}`}
           {...props}
