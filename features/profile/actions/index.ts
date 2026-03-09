@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logError } from "@/lib/logger";
 import {
   findMyProfile,
   findPublicProfileById,
@@ -88,6 +89,7 @@ export async function sendContactMessage({
 
   if (error) {
     console.error("[sendContactMessage] resend error:", error);
+    await logError("contact.send", `${error.name}: ${error.message}`, { ownerId, senderId: user.id });
     return { error: "შეტყობინება ვერ გაიგზავნა" };
   }
 
@@ -133,8 +135,10 @@ export async function upsertProfile(formData: FormData) {
       ...(avatar_url ? { avatar_url } : {}),
     });
   } catch (e) {
-    console.error("[upsertProfile] error:", (e as Error).message);
-    return { error: (e as Error).message };
+    const msg = (e as Error).message;
+    console.error("[upsertProfile] error:", msg);
+    await logError("profile.upsert", msg, { userId: user.id });
+    return { error: msg };
   }
 
   revalidatePath("/dashboard");

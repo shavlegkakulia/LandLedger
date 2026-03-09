@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import LoginForm from "@/features/auth/components/LoginForm";
+
+export const metadata: Metadata = {
+  title: "შესვლა",
+  description: "შედი LandLedger-ში და მართე შენი მიწის ნაკვეთები.",
+  robots: { index: false, follow: false },
+};
 
 interface Props {
   searchParams: Promise<{ error?: string }>;

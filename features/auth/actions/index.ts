@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { logError } from "@/lib/logger";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -9,7 +10,10 @@ export async function signUp(formData: FormData) {
   const password = formData.get("password") as string;
 
   const { error } = await supabase.auth.signUp({ email, password });
-  if (error) return { error: error.message };
+  if (error) {
+    await logError("auth.signup", error.message, { email });
+    return { error: error.message };
+  }
 
   redirect("/dashboard");
 }
@@ -20,7 +24,10 @@ export async function signIn(formData: FormData) {
   const password = formData.get("password") as string;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
+  if (error) {
+    await logError("auth.signin", error.message, { email });
+    return { error: error.message };
+  }
 
   redirect("/dashboard");
 }
@@ -36,12 +43,13 @@ export async function signInWithGoogle() {
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: {
-      redirectTo: "http://localhost:3001/auth/callback",
-    },
+    options: { redirectTo: "http://localhost:3001/auth/callback" },
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    await logError("auth.oauth", error.message, { provider: "google" });
+    return { error: error.message };
+  }
   if (data.url) redirect(data.url);
 }
 
@@ -56,6 +64,9 @@ export async function signInWithFacebook() {
     },
   });
 
-  if (error) return { error: error.message };
+  if (error) {
+    await logError("auth.oauth", error.message, { provider: "facebook" });
+    return { error: error.message };
+  }
   if (data.url) redirect(data.url);
 }

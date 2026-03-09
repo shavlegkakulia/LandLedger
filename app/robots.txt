@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /contact
+Allow: /parcels/
+
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /profile
+Disallow: /api/
+
+Sitemap: https://landledger.ge/sitemap.xml

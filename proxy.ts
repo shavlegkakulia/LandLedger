@@ -31,9 +31,10 @@ export async function proxy(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isOnboarding = pathname.startsWith("/onboarding");
   const isCallback = pathname.startsWith("/auth/callback");
+  const isPublic = pathname === "/" || pathname === "/contact" || pathname.startsWith("/parcels/");
 
   // არ არის logged in — login-ზე
-  if (!user && !isAuthPage && !isCallback) {
+  if (!user && !isAuthPage && !isCallback && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -47,7 +48,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // logged in — შევამოწმოთ პროფილი შევსებულია თუ არა
-  if (user && !isOnboarding && !isAuthPage && !isCallback) {
+  if (user && !isOnboarding && !isAuthPage && !isCallback && !isPublic) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("profile_completed")

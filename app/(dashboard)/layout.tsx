@@ -28,13 +28,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-background">
       <header className="bg-surface border-b border-border sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-primary">
+          <Link href="/" className="flex items-center gap-2 font-semibold text-primary">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-9.894A11.958 11.958 0 0112 3c3.866 0 7.32 1.834 9.547 4.703L16 12H8l1 8z" />
             </svg>
             LandLedger
           </Link>
-          <HeaderNav email={user?.email} displayName={displayName} avatarUrl={avatarUrl} />
+          <div className="flex items-center gap-4">
+            <Link href="/contact" className="text-sm text-text-faint hover:text-text-muted transition-colors hidden sm:block">კონტაქტი</Link>
+            <HeaderNav email={user?.email} displayName={displayName} avatarUrl={avatarUrl} />
+          </div>
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>

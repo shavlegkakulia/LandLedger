@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logError } from "@/lib/logger";
 import {
   findManyParcels,
   findParcelById,
@@ -38,7 +39,9 @@ export async function createParcel(formData: FormData) {
       notes: (formData.get("notes") as string) || null,
     });
   } catch (e) {
-    return { error: (e as Error).message };
+    const msg = (e as Error).message;
+    await logError("parcel.create", msg, { userId: user.id, cadastral_code: formData.get("cadastral_code") });
+    return { error: msg };
   }
 
   revalidatePath("/dashboard");
@@ -56,7 +59,9 @@ export async function updateParcel(id: string, formData: FormData) {
       notes: (formData.get("notes") as string) || null,
     });
   } catch (e) {
-    return { error: (e as Error).message };
+    const msg = (e as Error).message;
+    await logError("parcel.update", msg, { parcelId: id });
+    return { error: msg };
   }
 
   revalidatePath("/dashboard");
@@ -67,7 +72,9 @@ export async function deleteParcel(id: string) {
   try {
     await deleteParcelById(id);
   } catch (e) {
-    return { error: (e as Error).message };
+    const msg = (e as Error).message;
+    await logError("parcel.delete", msg, { parcelId: id });
+    return { error: msg };
   }
 
   revalidatePath("/dashboard");
