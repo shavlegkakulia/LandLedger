@@ -186,6 +186,8 @@ export async function upsertProfile(formData: FormData) {
       show_email: false,
       show_name: formData.get("show_name") === "on",
       show_avatar: formData.get("show_avatar") === "on",
+      personal_id: (formData.get("personal_id") as string) || null,
+      show_personal_id: formData.get("show_personal_id") === "on",
       profile_completed: true,
       ...(avatar_url ? { avatar_url } : {}),
     });
@@ -195,7 +197,7 @@ export async function upsertProfile(formData: FormData) {
     return { error: "პროფილის შენახვა ვერ მოხერხდა" };
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
 
   const { headers } = await import("next/headers");
   const headersList = await headers();

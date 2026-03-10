@@ -134,13 +134,15 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
       show_birth_date: profile?.show_birth_date ?? false,
       show_name: profile?.show_name ?? true,
       show_avatar: profile?.show_avatar ?? true,
+      personal_id: profile?.personal_id ?? "",
+      show_personal_id: profile?.show_personal_id ?? false,
     },
   });
 
   function onSubmit(values: ProfileFormValues) {
     const fd = new FormData();
     Object.entries(values).forEach(([k, v]) => { if (v != null && v !== "") fd.append(k, String(v)); });
-    (["show_address", "show_gender", "show_birth_date", "show_name", "show_avatar"] as const).forEach(
+    (["show_address", "show_gender", "show_birth_date", "show_name", "show_avatar", "show_personal_id"] as const).forEach(
       (key) => { fd.set(key, values[key] ? "on" : ""); }
     );
     if (avatarFile) fd.append("avatar", avatarFile);
@@ -284,6 +286,19 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
               className={inputCls(!!errors.birth_date)}
             />
           </FieldWrapper>
+          <FieldWrapper label={t("personalIdLabel")} error={errors.personal_id?.message} hint={t("personalIdHint")}>
+            <div className="relative">
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-faint pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2" />
+              </svg>
+              <input
+                {...register("personal_id")}
+                type="text"
+                placeholder={t("personalIdPlaceholder")}
+                className={inputCls(!!errors.personal_id) + " pl-10"}
+              />
+            </div>
+          </FieldWrapper>
         </div>
       </Card>
 
@@ -387,6 +402,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
           <PrivacyToggle label={t("showAddress")} hint={t("showAddressHint")} name="show_address" control={control} />
           <PrivacyToggle label={t("showGender")} hint={t("showGenderHint")} name="show_gender" control={control} />
           <PrivacyToggle label={t("showBirthDate")} hint={t("showBirthDateHint")} name="show_birth_date" control={control} />
+          <PrivacyToggle label={t("showPersonalId")} hint={t("showPersonalIdHint")} name="show_personal_id" control={control} />
         </div>
       </Card>
 

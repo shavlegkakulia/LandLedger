@@ -230,11 +230,12 @@
     "editProfile": "Edit Profile",
     "myParcel": "This is your parcel",
     "contact": "Contact Owner",
-    "noContact": "The owner has not made contact info public",
+    "noContact": "The owner has not shared any additional information",
     "anonymous": "Anonymous user",
     "address": "Address",
     "gender": "Gender",
-    "birthDate": "Date of Birth"
+    "birthDate": "Date of Birth",
+    "personalId": "Personal ID Number"
   },
   "contactModal": {
     "title": "Contact Owner",
@@ -272,6 +273,9 @@
     "genderOther": "Other",
     "birthDateLabel": "Date of Birth",
     "birthDateHint": "Optional",
+    "personalIdLabel": "Personal ID Number",
+    "personalIdPlaceholder": "e.g. 01234567890",
+    "personalIdHint": "Optional",
     "phoneLabel": "Mobile",
     "phonePlaceholder": "+995 5XX XXX XXX",
     "phoneHint": "Phone or email is required",
@@ -296,6 +300,8 @@
     "showGenderHint": "Other users will be able to see your gender",
     "showBirthDate": "Show date of birth",
     "showBirthDateHint": "Other users will be able to see your date of birth",
+    "showPersonalId": "Show Personal ID",
+    "showPersonalIdHint": "Other users will be able to see your personal ID number",
     "privacyExplainer": "These settings control what information is visible to other users when they view your parcel. Fields that are turned off will only appear to you.",
     "contactRequired": "Phone or email — at least one is required so others can contact you.",
     "saveButton": "Save Changes",

@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import ParcelFilters from "@/features/parcels/components/ParcelFilters";
 import { getMyProfile } from "@/features/profile/actions";
+
+export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { ParcelCard } from "@/features/parcels/components/ParcelCard";
 import { getTranslations } from "next-intl/server";

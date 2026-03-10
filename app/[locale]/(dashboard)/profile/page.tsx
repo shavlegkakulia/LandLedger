@@ -5,6 +5,8 @@ import { BackLink } from "@/components/ui/BackLink";
 import { DeleteAccountButton } from "@/features/profile/components/DeleteAccountButton";
 import { getTranslations } from "next-intl/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const supabase = await createClient();

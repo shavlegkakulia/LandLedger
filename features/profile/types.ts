@@ -15,6 +15,8 @@ export interface Profile {
   show_email: boolean;
   show_name: boolean;
   show_avatar: boolean;
+  personal_id: string | null;
+  show_personal_id: boolean;
   profile_completed: boolean;
   created_at: string;
   updated_at: string;
@@ -30,9 +32,11 @@ export interface PublicProfile {
   birth_date: string | null;
   address: string | null;
   avatar_url: string | null;
+  personal_id: string | null;
   show_name: boolean;
   show_avatar: boolean;
   show_address: boolean;
   show_gender: boolean;
   show_birth_date: boolean;
+  show_personal_id: boolean;
 }
