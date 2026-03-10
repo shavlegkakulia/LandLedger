@@ -20,11 +20,11 @@ export const profileSchema = z
       .refine((v) => !v || phoneRegex.test(v.replace(/\s/g, "")), "ფორმატი: +995 5XX XXX XXX"),
     address: z.string().max(300, "მაქს. 300 სიმბოლო").optional().nullable(),
     email: z.string().email("არასწორი ელ-ფოსტა").optional().nullable().or(z.literal("")),
-    show_phone: z.boolean(),
     show_address: z.boolean(),
     show_gender: z.boolean(),
     show_birth_date: z.boolean(),
-    show_email: z.boolean(),
+    show_name: z.boolean(),
+    show_avatar: z.boolean(),
   })
   .refine(
     (data) => !!(data.phone?.trim()) || !!(data.email?.trim()),

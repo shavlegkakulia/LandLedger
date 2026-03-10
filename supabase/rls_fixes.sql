@@ -80,17 +80,21 @@ create or replace view public.profiles_public
   as
   select
     id,
-    first_name,
-    last_name,
-    avatar_url,
-    -- პირადი ველები: მხოლოდ show_* = true-ს დროს ან საკუთარი პროფილი
-    case when show_email      or auth.uid() = id then email      else null end as email,
-    case when show_phone      or auth.uid() = id then phone      else null end as phone,
+    -- სახელი/გვარი: show_name = false მაშინ "ანონიმური მომხმარებელი"
+    case when show_name or auth.uid() = id then first_name else null end as first_name,
+    case when show_name or auth.uid() = id then last_name  else null end as last_name,
+    -- ფოტო: show_avatar = false მაშინ null
+    case when show_avatar or auth.uid() = id then avatar_url else null end as avatar_url,
+    -- email და phone ყოველთვის private
+    null::text as email,
+    null::text as phone,
     case when show_address    or auth.uid() = id then address    else null end as address,
     case when show_gender     or auth.uid() = id then gender     else null end as gender,
     case when show_birth_date or auth.uid() = id then birth_date else null end as birth_date,
-    show_email,
-    show_phone,
+    false          as show_email,
+    false          as show_phone,
+    show_name,
+    show_avatar,
     show_address,
     show_gender,
     show_birth_date,

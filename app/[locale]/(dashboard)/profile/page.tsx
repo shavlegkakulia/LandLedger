@@ -22,11 +22,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ locale
     : null;
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-3xl space-y-8">
       <BackLink href={`/${locale}/dashboard`} title={t("title")} subtitle={t("subtitle")} />
       <ProfileForm profile={profileWithAvatar} />
 
-      <div className="border border-danger-border rounded-xl p-5 bg-danger-light">
+      <div className="border border-danger-border rounded-2xl p-6 bg-danger-light">
         <h3 className="text-sm font-semibold text-danger mb-1">{t("dangerZone")}</h3>
         <p className="text-xs text-text-muted mb-4">{t("deleteWarning")}</p>
         <DeleteAccountButton />

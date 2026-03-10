@@ -54,16 +54,24 @@ export async function sendContactMessage({
     return { error: "24 საათში მაქსიმუმ 3 შეტყობინების გაგზავნა შეიძლება ერთ მფლობელზე" };
   }
 
-  const { data: owner } = await supabase
-    .from("profiles_public")
-    .select("first_name, last_name, email, show_email")
+  // owner-ის email — service role-ით ვკითხულობთ (RLS bypasses სხვის profile-ზე)
+  const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+  const admin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: owner } = await admin
+    .from("profiles")
+    .select("first_name, last_name, email")
     .eq("id", ownerId)
     .single();
 
-  if (!owner?.show_email || !owner?.email) {
-    return { error: "მფლობელმა ელ-ფოსტა არ გაასაჯაროვა" };
+  if (!owner?.email) {
+    return { error: "მფლობელს ელ-ფოსტა არ აქვს მითითებული" };
   }
 
+  // sender — authenticated client-ით (საკუთარი row)
   const { data: sender } = await supabase
     .from("profiles")
     .select("first_name, last_name, email, phone")
@@ -71,10 +79,11 @@ export async function sendContactMessage({
     .single();
 
   const senderName = sender
-    ? `${sender.first_name} ${sender.last_name}`.trim()
-    : user.email ?? "უცნობი";
+    ? (`${sender.first_name ?? ""} ${sender.last_name ?? ""}`.trim() || (user.email ?? "უცნობი"))
+    : (user.email ?? "უცნობი");
 
-  const senderContact = [sender?.email, sender?.phone].filter(Boolean).join(" / ");
+  // sender-ის email და phone ყოველთვის ერთვის — privacy flag-ების მიუხედავად
+  const senderContact = [sender?.email || user.email, sender?.phone].filter(Boolean).join(" / ");
   const staticText = `LandLedger-ის გზავნილი: ${senderName} დაგიკავშირდა ნაკვეთის საკითხზე.`;
   const fullMessage = cleanMessage ? `${staticText}\n\n${cleanMessage}` : staticText;
 
@@ -82,9 +91,9 @@ export async function sendContactMessage({
   const escapedMessage = escapeHtml(cleanMessage);
   const escapedSenderName = escapeHtml(senderName);
   const escapedSenderContact = escapeHtml(senderContact);
-
+  
   const { error } = await resend.emails.send({
-    from: "LandLedger <onboarding@resend.dev>",
+    from: "LandLedger <noreply@landledger.ge>",
     to: owner.email,
     subject: `LandLedger — ${senderName} გიკავშირდება`,
     text: `${fullMessage}\n\n---\nგამგზავნის საკონტაქტო: ${senderContact}`,
@@ -128,7 +137,7 @@ const ALLOWED_AVATAR_TYPES: Record<string, string> = {
   "image/webp": "webp",
   "image/gif": "gif",
 };
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_AVATAR_SIZE = 1 * 1024 * 1024; // 1MB
 
 export async function upsertProfile(formData: FormData) {
   const supabase = await createClient();
@@ -143,7 +152,7 @@ export async function upsertProfile(formData: FormData) {
       return { error: "სურათის ფორმატი არ არის მხარდაჭერილი (JPG, PNG, WEBP, GIF)" };
     }
     if (avatarFile.size > MAX_AVATAR_SIZE) {
-      return { error: "სურათი ზედმეტად დიდია (მაქს. 5MB)" };
+      return { error: "სურათი ზედმეტად დიდია (მაქს. 1MB)" };
     }
 
     const ext = ALLOWED_AVATAR_TYPES[avatarFile.type];
@@ -170,11 +179,13 @@ export async function upsertProfile(formData: FormData) {
       phone: (formData.get("phone") as string) || null,
       address: (formData.get("address") as string) || null,
       email: (formData.get("email") as string) || user.email,
-      show_phone: formData.get("show_phone") === "on",
+      show_phone: false,
       show_address: formData.get("show_address") === "on",
       show_gender: formData.get("show_gender") === "on",
       show_birth_date: formData.get("show_birth_date") === "on",
-      show_email: formData.get("show_email") === "on",
+      show_email: false,
+      show_name: formData.get("show_name") === "on",
+      show_avatar: formData.get("show_avatar") === "on",
       profile_completed: true,
       ...(avatar_url ? { avatar_url } : {}),
     });
@@ -185,7 +196,11 @@ export async function upsertProfile(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+
+  const { headers } = await import("next/headers");
+  const headersList = await headers();
+  const locale = headersList.get("x-next-intl-locale") ?? "ka";
+  redirect(`/${locale}/dashboard`);
 }
 
 export async function deleteAccount() {

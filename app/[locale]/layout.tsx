@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
 import { CookieBanner } from "@/components/CookieBanner";
+import { ToastProvider } from "@/components/ui/Toast";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -72,8 +73,10 @@ export default async function LocaleLayout({
     <html lang={locale} className={plusJakarta.variable}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          {children}
-          <CookieBanner />
+          <ToastProvider>
+            {children}
+            <CookieBanner />
+          </ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

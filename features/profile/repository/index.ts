@@ -20,7 +20,7 @@ export async function findPublicProfileById(userId: string): Promise<PublicProfi
   // profiles_public view — show_* flags DB-დონეზე enforce-ს (rls_fixes.sql)
   const { data } = await supabase
     .from("profiles_public")
-    .select("id, first_name, last_name, gender, birth_date, phone, address, email, show_phone, show_address, show_gender, show_birth_date, show_email")
+    .select("id, first_name, last_name, avatar_url, gender, birth_date, address, show_name, show_avatar, show_address, show_gender, show_birth_date")
     .eq("id", userId)
     .single();
 

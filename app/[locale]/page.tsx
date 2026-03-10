@@ -24,7 +24,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 }
 
 function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: boolean }) {
-  const t = useTranslations();
   const nav = useTranslations("nav");
   const hero = useTranslations("hero");
   const how = useTranslations("howItWorks");
@@ -75,14 +74,16 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
 
           <h1 className="text-4xl sm:text-5xl font-bold text-text leading-tight mb-5">
             {hero("title")}<br />
-            და <span className="text-primary">{hero("titleHighlight")}</span> {hero("titleSuffix")}
+            <span className="text-primary">{hero("titleHighlight")}</span> {hero("titleSuffix")}
           </h1>
 
           <p className="text-text-muted text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
             {hero("subtitle")}
           </p>
 
-          <HeroSearch locale={locale} placeholder={hero("searchPlaceholder")} buttonText={hero("searchButton")} />
+          {isLoggedIn && (
+            <HeroSearch locale={locale} placeholder={hero("searchPlaceholder")} buttonText={hero("searchButton")} />
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
             <Link href={isLoggedIn ? `/${locale}/dashboard` : `/${locale}/register`}
@@ -98,14 +99,15 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
             </a>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-text-faint">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/80 border border-border rounded-2xl px-5 py-3 mb-4 shadow-sm">
             {[
               { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", key: "trustPrivacy" },
               { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", key: "trustMessage" },
               { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", key: "trustFree" },
-            ].map(({ icon, key }) => (
-              <span key={key} className="flex items-center gap-1.5">
-                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            ].map(({ icon, key }, i) => (
+              <span key={key} className="flex items-center gap-1.5 text-sm text-text-muted">
+                {i > 0 && <span className="text-border mx-1 hidden sm:inline">·</span>}
+                <svg className="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                 </svg>
                 {hero(key as Parameters<typeof hero>[0])}
@@ -119,13 +121,13 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
           <p className="text-center text-text-muted text-sm mb-10 max-w-lg mx-auto">{how("subtitle")}</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {([
-              { step: "01", titleKey: "step1Title", descKey: "step1Desc", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
-              { step: "02", titleKey: "step2Title", descKey: "step2Desc", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+              { step: "01", titleKey: "step1Title", descKey: "step1Desc", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
+              { step: "02", titleKey: "step2Title", descKey: "step2Desc", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
               { step: "03", titleKey: "step3Title", descKey: "step3Desc", icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
             ] as const).map(({ step, titleKey, descKey, icon }) => (
-              <div key={step} className="bg-white rounded-2xl border border-border shadow-sm p-6 hover:shadow-md transition-shadow">
+              <div key={step} className="bg-white rounded-2xl border border-border shadow-sm p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                     </svg>
@@ -141,11 +143,11 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
 
         <section className="bg-primary">
           <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-            <h2 className="text-2xl font-bold text-white mb-3">{cta("title")}</h2>
-            <p className="text-green-100 text-sm max-w-xl mx-auto mb-2 leading-relaxed">{cta("text1")}</p>
-            <p className="text-green-100 text-sm max-w-xl mx-auto mb-8 leading-relaxed">{cta("text2")}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">{cta("title")}</h2>
+            <p className="text-green-100 text-base max-w-xl mx-auto mb-6 leading-relaxed">{cta("text1")}</p>
+            <p className="text-green-200 text-sm max-w-xl mx-auto mb-8 leading-relaxed">{cta("text2")}</p>
             <Link href={isLoggedIn ? `/${locale}/dashboard` : `/${locale}/register`}
-              className="inline-flex items-center gap-2 bg-white text-primary font-medium px-6 py-3 rounded-xl hover:bg-primary-light transition-colors">
+              className="inline-flex items-center gap-2 bg-white text-primary font-semibold px-7 py-3.5 rounded-xl hover:bg-primary-light transition-colors shadow-md hover:shadow-lg">
               {cta("button")}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
