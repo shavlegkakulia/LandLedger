@@ -8,7 +8,8 @@ import ParcelActions from "@/features/parcels/components/ParcelActions";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://landledger.ge";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const siteUrl = rawSiteUrl.startsWith("http") ? rawSiteUrl : "https://landledger.ge";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string; locale: string }> }): Promise<Metadata> {
   const { id } = await params;

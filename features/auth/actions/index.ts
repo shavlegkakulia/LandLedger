@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logError } from "@/lib/logger";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const SITE_URL = rawSiteUrl.startsWith("http") ? rawSiteUrl : "http://localhost:3001";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();

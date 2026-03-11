@@ -14,7 +14,8 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://landledger.ge";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+const siteUrl = rawSiteUrl.startsWith("http") ? rawSiteUrl : "https://landledger.ge";
 
 const localeOgLocale: Record<string, string> = {
   ka: "ka_GE",
