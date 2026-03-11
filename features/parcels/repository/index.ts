@@ -20,8 +20,8 @@ export async function findManyParcels(filters: ParcelFilters = {}): Promise<Pagi
     const { data: { user } } = await supabase.auth.getUser();
     if (user) query = query.eq("user_id", user.id);
   }
-  if (filters.region) query = query.ilike("region", `%${filters.region}%`);
-  if (filters.municipality) query = query.ilike("municipality", `%${filters.municipality}%`);
+  if (filters.region) query = query.eq("region", filters.region);
+  if (filters.municipality) query = query.eq("municipality", filters.municipality);
   if (filters.cadastral) query = query.ilike("cadastral_code", `%${filters.cadastral}%`);
 
   const { data, error, count } = await query;

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import OwnerCard from "@/features/parcels/components/OwnerCard";
 import ParcelActions from "@/features/parcels/components/ParcelActions";
 import { getTranslations } from "next-intl/server";
+import { REGIONS, MUNICIPALITY_IDS, toRegionId, toMunicipalityId } from "@/features/parcels/constants";
 import type { Metadata } from "next";
 
 const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
@@ -36,6 +37,8 @@ export default async function ParcelDetailPage({ params }: { params: Promise<{ i
   const { id, locale } = await params;
   const t = await getTranslations("parcelDetail");
   const tp = await getTranslations("parcel");
+  const tRegions = await getTranslations("regions");
+  const tMunicipalities = await getTranslations("municipalities");
 
   let parcel;
   try { parcel = await getParcel(id); }
@@ -91,8 +94,22 @@ export default async function ParcelDetailPage({ params }: { params: Promise<{ i
           <dl className="divide-y divide-border">
             <Row label={tp("cadastralCode")} value={parcel.cadastral_code} mono />
             <Row label={tp("address")} value={parcel.address} />
-            {parcel.region && <Row label={tp("region")} value={parcel.region} />}
-            {parcel.municipality && <Row label={tp("municipality")} value={parcel.municipality} />}
+            {parcel.region && (
+              <Row
+                label={tp("region")}
+                value={REGIONS[toRegionId(parcel.region)] ? tRegions(toRegionId(parcel.region)) : parcel.region}
+              />
+            )}
+            {parcel.municipality && (
+              <Row
+                label={tp("municipality")}
+                value={
+                  MUNICIPALITY_IDS.has(toMunicipalityId(parcel.municipality))
+                    ? tMunicipalities(toMunicipalityId(parcel.municipality))
+                    : parcel.municipality
+                }
+              />
+            )}
             {parcel.area_sqm && <Row label={tp("area")} value={`${parcel.area_sqm} მ²`} />}
             {parcel.notes && <Row label={tp("notes")} value={parcel.notes} />}
             <Row label={tp("addedDate")} value={new Date(parcel.created_at).toLocaleDateString("ka-GE", { year: "numeric", month: "long", day: "numeric" })} />

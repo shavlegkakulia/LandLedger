@@ -5,10 +5,13 @@ import { useState, useTransition } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { deleteParcel } from "@/features/parcels/actions";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { REGIONS, MUNICIPALITY_IDS, toRegionId, toMunicipalityId } from "@/features/parcels/constants";
 import type { Parcel } from "@/features/parcels/types";
 
 export function ParcelCard({ parcel, currentUserId }: { parcel: Parcel; currentUserId: string }) {
   const t = useTranslations("parcelCard");
+  const tRegions = useTranslations("regions");
+  const tMunicipalities = useTranslations("municipalities");
   const locale = useLocale();
   const isOwner = parcel.user_id === currentUserId;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -53,7 +56,12 @@ export function ParcelCard({ parcel, currentUserId }: { parcel: Parcel; currentU
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <p className="text-xs text-text-muted">{[parcel.region, parcel.municipality].filter(Boolean).join(", ")}</p>
+              <p className="text-xs text-text-muted">
+                {[
+                  parcel.region && (REGIONS[toRegionId(parcel.region)] ? tRegions(toRegionId(parcel.region) as never) : parcel.region),
+                  parcel.municipality && (MUNICIPALITY_IDS.has(toMunicipalityId(parcel.municipality)) ? tMunicipalities(toMunicipalityId(parcel.municipality) as never) : parcel.municipality),
+                ].filter(Boolean).join(", ")}
+              </p>
             </div>
           )}
           {parcel.notes && <p className="text-xs text-text-faint mt-3 line-clamp-2 leading-relaxed">{parcel.notes}</p>}

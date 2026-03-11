@@ -4,23 +4,9 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
-const DEBOUNCE_MS = 350;
+import { REGIONS, toRegionId, toMunicipalityId } from "@/features/parcels/constants";
 
-// Georgia regions → municipalities cascade
-const REGIONS: Record<string, string[]> = {
-  "თბილისი": ["ისანი", "სამგორი", "ნაძალადევი", "დიდუბე", "ჩუღურეთი", "მტაწმინდა", "ვაკე", "საბურთალო", "გლდანი", "კრწანისი"],
-  "კახეთი": ["თელავი", "გურჯაანი", "სიღნაღი", "ლაგოდეხი", "ყვარელი", "ახმეტა", "დედოფლისწყარო", "საგარეჯო"],
-  "შიდა ქართლი": ["გორი", "ქარელი", "კასპი", "ხაშური"],
-  "ქვემო ქართლი": ["რუსთავი", "გარდაბანი", "მარნეული", "ბოლნისი", "დმანისი", "თეთრიწყარო", "წალკა"],
-  "მცხეთა-მთიანეთი": ["მცხეთა", "თიანეთი", "ყაზბეგი", "დუშეთი"],
-  "სამცხე-ჯავახეთი": ["ახალციხე", "ბორჯომი", "ახალქალაქი", "ნინოწმინდა", "ასპინძა", "ადიგენი"],
-  "გურია": ["ოზურგეთი", "ლანჩხუთი", "ჩოხატაური"],
-  "სამეგრელო-ზემო სვანეთი": ["ზუგდიდი", "სენაკი", "ჩხოროწყუ", "მარტვილი", "აბაშა", "ხობი", "მესტია"],
-  "იმერეთი": ["ქუთაისი", "ბაღდათი", "ვანი", "ზესტაფონი", "თერჯოლა", "სამტრედია", "საჩხერე", "ტყიბული", "ჩიატურა", "ხარაგაული", "ხონი"],
-  "რაჭა-ლეჩხუმი": ["ამბროლაური", "ლენტეხი", "ონი", "ცაგერი"],
-  "აჭარა": ["ბათუმი", "ქობულეთი", "ხელვაჩაური", "ხულო", "შუახევი", "კედა"],
-  "აფხაზეთი": ["სოხუმი"],
-};
+const DEBOUNCE_MS = 350;
 
 interface FilterState {
   cadastral: string;
@@ -36,14 +22,16 @@ const XIcon = () => (
 
 export default function ParcelFilters({ currentUserId }: { currentUserId: string }) {
   const t = useTranslations("parcelFilters");
+  const tRegions = useTranslations("regions");
+  const tMunicipalities = useTranslations("municipalities");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [values, setValues] = useState<FilterState>({
     cadastral: searchParams.get("cadastral") ?? "",
-    region: searchParams.get("region") ?? "",
-    municipality: searchParams.get("municipality") ?? "",
+    region: (toRegionId(searchParams.get("region") ?? "") || searchParams.get("region")) ?? "",
+    municipality: (toMunicipalityId(searchParams.get("municipality") ?? "") || searchParams.get("municipality")) ?? "",
   });
   const [regionOpen, setRegionOpen] = useState(false);
   const [munOpen, setMunOpen] = useState(false);
@@ -106,8 +94,8 @@ export default function ParcelFilters({ currentUserId }: { currentUserId: string
 
   const activeChips = [
     values.cadastral && { key: "cadastral" as const, label: t("codeChip", { value: values.cadastral }) },
-    values.region && { key: "region" as const, label: t("regionChip", { value: values.region }) },
-    values.municipality && { key: "municipality" as const, label: t("munChip", { value: values.municipality }) },
+    values.region && { key: "region" as const, label: t("regionChip", { value: tRegions(values.region as never) }) },
+    values.municipality && { key: "municipality" as const, label: t("munChip", { value: tMunicipalities(values.municipality as never) }) },
   ].filter(Boolean) as { key: keyof FilterState; label: string }[];
 
   const hasFilters = activeChips.length > 0 || mine;
@@ -147,7 +135,7 @@ export default function ParcelFilters({ currentUserId }: { currentUserId: string
                 : "border-border bg-background/50 text-text-faint hover:border-primary/30"
             } focus:outline-none focus:ring-2 focus:ring-primary/20`}
           >
-            <span className="truncate">{values.region || t("regionPlaceholder")}</span>
+            <span className="truncate">{values.region ? tRegions(values.region as never) : t("regionPlaceholder")}</span>
             <span className="flex items-center gap-1 shrink-0">
               {values.region && (
                 <span onClick={(e) => { e.stopPropagation(); clearChip("region"); }} className="text-primary/60 hover:text-primary transition-colors">
@@ -170,7 +158,7 @@ export default function ParcelFilters({ currentUserId }: { currentUserId: string
                     values.region === r ? "bg-primary-light text-primary font-medium" : "text-text-muted"
                   }`}
                 >
-                  {r}
+                  {tRegions(r as never)}
                 </button>
               ))}
             </div>
@@ -191,7 +179,7 @@ export default function ParcelFilters({ currentUserId }: { currentUserId: string
                   : "border-border bg-background/50 text-text-faint hover:border-primary/30"
             } focus:outline-none focus:ring-2 focus:ring-primary/20`}
           >
-            <span className="truncate">{values.municipality || t("municipalityPlaceholder")}</span>
+            <span className="truncate">{values.municipality ? tMunicipalities(values.municipality as never) : t("municipalityPlaceholder")}</span>
             <span className="flex items-center gap-1 shrink-0">
               {values.municipality && (
                 <span onClick={(e) => { e.stopPropagation(); clearChip("municipality"); }} className="text-primary/60 hover:text-primary transition-colors">
@@ -214,7 +202,7 @@ export default function ParcelFilters({ currentUserId }: { currentUserId: string
                     values.municipality === m ? "bg-primary-light text-primary font-medium" : "text-text-muted"
                   }`}
                 >
-                  {m}
+                  {tMunicipalities(m as never)}
                 </button>
               ))}
             </div>
