@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { countParcels } from "@/features/parcels/repository";
 import type { Metadata } from "next";
 import { HeroSearch } from "@/features/landing/HeroSearch";
 import { useTranslations } from "next-intl";
@@ -19,11 +20,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const parcelCount = await countParcels();
 
-  return <HomePageClient locale={locale} isLoggedIn={!!user} />;
+  return <HomePageClient locale={locale} isLoggedIn={!!user} parcelCount={parcelCount} />;
 }
 
-function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: boolean }) {
+function HomePageClient({ locale, isLoggedIn, parcelCount }: { locale: string; isLoggedIn: boolean; parcelCount: number }) {
   const nav = useTranslations("nav");
   const hero = useTranslations("hero");
   const how = useTranslations("howItWorks");
@@ -34,12 +36,12 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       <header className="bg-white/70 backdrop-blur-sm border-b border-border sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-primary">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Link href={`/${locale}`} className="flex items-center gap-2 text-primary">
+            <svg className="w-8 h-8 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-9.894A11.958 11.958 0 0112 3c3.866 0 7.32 1.834 9.547 4.703L16 12H8l1 8z" />
             </svg>
-            <span className="text-lg font-bold tracking-tight">LandLedger</span>
-          </div>
+            <span className="hidden sm:inline text-lg font-bold tracking-tight">LandLedger</span>
+          </Link>
           <nav className="flex items-center gap-3">
             <a href="#how-it-works" className="text-sm text-text-muted hover:text-primary transition-colors hidden sm:block">
               {nav("howItWorks")}
@@ -64,7 +66,7 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
       </header>
 
       <main>
-        <section className="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center">
+        <section className="max-w-6xl mx-auto px-4 pt-8 sm:pt-20 pb-16 text-center">
           <div className="inline-flex items-center gap-2 bg-primary-light text-primary text-xs font-medium px-3 py-1.5 rounded-full mb-6">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-9.894A11.958 11.958 0 0112 3c3.866 0 7.32 1.834 9.547 4.703L16 12H8l1 8z" />
@@ -72,7 +74,7 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
             {hero("badge")}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-text leading-tight mb-5">
+          <h1 className="text-[2.7rem] sm:text-5xl font-bold text-text leading-tight mb-5">
             {hero("title")}<br />
             <span className="text-primary">{hero("titleHighlight")}</span> {hero("titleSuffix")}
           </h1>
@@ -99,21 +101,52 @@ function HomePageClient({ locale, isLoggedIn }: { locale: string; isLoggedIn: bo
             </a>
           </div>
 
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-white/80 border border-border rounded-2xl px-5 py-3 mb-4 shadow-sm">
-            {[
-              { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", key: "trustPrivacy" },
-              { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", key: "trustMessage" },
-              { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", key: "trustFree" },
-            ].map(({ icon, key }, i) => (
-              <span key={key} className="flex items-center gap-1.5 text-sm text-text-muted">
-                {i > 0 && <span className="text-border mx-1 hidden sm:inline">·</span>}
-                <svg className="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
-                </svg>
-                {hero(key as Parameters<typeof hero>[0])}
-              </span>
-            ))}
+          <div className="w-full max-w-xl sm:max-w-none sm:inline-flex mx-auto bg-white/80 border border-border rounded-2xl px-5 py-4 sm:py-3 mb-3 sm:mb-4 shadow-sm text-left sm:text-center flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-2 items-start sm:items-center sm:justify-center">
+              {[
+                { icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", key: "trustPrivacy" },
+                { icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z", key: "trustMessage" },
+                { icon: "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z", key: "trustFree" },
+              ].map(({ icon, key }, i) => (
+                <span key={key} className="flex items-start sm:items-center gap-3 sm:gap-1.5">
+                  {i > 0 && <span className="hidden sm:inline text-border mx-1 select-none" aria-hidden>·</span>}
+                  <svg className="w-5 h-5 sm:w-4 sm:h-4 text-primary shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                  </svg>
+                  <span className="text-sm text-text-muted leading-relaxed min-w-0">{hero(key as Parameters<typeof hero>[0])}</span>
+                </span>
+              ))}
           </div>
+
+          {parcelCount > 0 && (
+            <div className="w-full max-w-3xl mx-auto mt-8 text-left">
+              <div
+                className="flex items-center gap-4 rounded-2xl p-6 border"
+                style={{
+                  backgroundColor: "#F5F7FA",
+                  borderColor: "#E5E7EB",
+                }}
+              >
+                <div className="flex-shrink-0" style={{ color: "#3B82F6" }}>
+                  <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold leading-tight" style={{ fontSize: "20px", color: "#111827" }}>
+                    {hero("parcelsCountHeadlineBefore")}
+                    <span className="font-bold tabular-nums text-primary" style={{ fontSize: "22px" }}>
+                      {parcelCount.toLocaleString()}
+                    </span>
+                    {hero("parcelsCountHeadlineAfter")}
+                  </h3>
+                  <p className="mt-1 leading-relaxed" style={{ fontSize: "14px", color: "#6B7280" }}>
+                    {hero("parcelsCountDescription")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
         <section id="how-it-works" className="max-w-6xl mx-auto px-4 pb-20">

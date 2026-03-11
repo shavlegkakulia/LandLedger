@@ -19,7 +19,10 @@
     "ctaSecondary": "როგორ მუშაობს",
     "trustPrivacy": "მფლობელების პირადი ინფო საჯაროდ არ ჩანს",
     "trustMessage": "მფლობელი თავად წყვეტს დაგიკავშირდეს თუ არა",
-    "trustFree": "სრულიად უფასო"
+    "trustFree": "სრულიად უფასო",
+    "parcelsCountHeadlineBefore": "ჩვენს ბაზაში უკვე არის ",
+    "parcelsCountHeadlineAfter": " ნაკვეთი",
+    "parcelsCountDescription": "სურვილის შემთხვევაში შეგიძლიათ დაუკავშირდეთ მათ მეპატრონეებს"
   },
   "howItWorks": {
     "title": "როგორ მუშაობს",

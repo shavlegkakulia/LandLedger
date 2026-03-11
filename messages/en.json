@@ -19,7 +19,10 @@
     "ctaSecondary": "How It Works",
     "trustPrivacy": "Owner's personal info is not publicly visible",
     "trustMessage": "The owner decides whether to contact you",
-    "trustFree": "Completely free"
+    "trustFree": "Completely free",
+    "parcelsCountHeadlineBefore": "Our database already has ",
+    "parcelsCountHeadlineAfter": " parcels",
+    "parcelsCountDescription": "If you wish, you can contact their owners"
   },
   "howItWorks": {
     "title": "How It Works",

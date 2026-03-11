@@ -3,6 +3,15 @@ import type { Parcel, ParcelFilters, ParcelInsert, ParcelUpdate, PaginatedParcel
 
 const DEFAULT_PAGE_SIZE = 20;
 
+export async function countParcels(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("parcels")
+    .select("*", { count: "exact", head: true });
+  if (error) return 0;
+  return count ?? 0;
+}
+
 export async function findManyParcels(filters: ParcelFilters = {}): Promise<PaginatedParcels> {
   const supabase = await createClient();
   const page = Math.max(1, filters.page ?? 1);

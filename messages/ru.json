@@ -19,7 +19,10 @@
     "ctaSecondary": "Как это работает",
     "trustPrivacy": "Личные данные владельцев публично не отображаются",
     "trustMessage": "Владелец сам решает, связаться с вами или нет",
-    "trustFree": "Полностью бесплатно"
+    "trustFree": "Полностью бесплатно",
+    "parcelsCountHeadlineBefore": "В нашей базе уже ",
+    "parcelsCountHeadlineAfter": " участков",
+    "parcelsCountDescription": "При желании вы можете связаться с их владельцами"
   },
   "howItWorks": {
     "title": "Как работает",
