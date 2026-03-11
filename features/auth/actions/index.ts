@@ -24,16 +24,10 @@ export async function signIn(formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const rememberMe = formData.get("rememberMe") === "1";
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
-    options: {
-      // rememberMe=false: session cookie (browser close = logout)
-      // rememberMe=true: persistent cookie (default Supabase = 1 week)
-      ...(rememberMe ? {} : { expiresIn: undefined }),
-    },
   });
   if (error) {
     await logError("auth.signin", error.message, { email });
